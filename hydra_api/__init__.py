@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 import base64
 import requests
@@ -33,33 +33,7 @@ class Client:
     def __init__(self, api_key):
         self.api_key = api_key
 
-    def recognize(self, data_source_id, files, doFaster=False):
-        if type(files) is not list:
-            msg = 'You must pass in a list of files, not a {}'.format(type(files))
-            raise TypeError(msg)
-        payload = { 'files': [], 'doFaster': doFaster }
-        for f in files:
-            if f.endswith('.pdf'):
-                mimeType = 'application/pdf'
-            elif f.endswith('.bmp'):
-                mimeType = 'image/bmp'
-            elif f.endswith('.gif'):
-                mimeType = 'image/gif'
-            elif f.endswith('.jpeg'):
-                mimeType = 'image/jpeg'
-            elif f.endswith('.jpg'):
-                mimeType = 'image/jpg'
-            elif f.endswith('.png'):
-                mimeType = 'image/png'
-            else:
-                msg = '{} does not have a valid extension; it must be one of ".pdf", ".bmp", ".gif", ".jpeg", ".jpg", or ".png".'.format(f)
-                raise Exception(msg)
-            with open(f, 'rb') as fileObj:
-                base64File = base64.b64encode(fileObj.read())
-            payload['files'].append({
-                'mimeType': mimeType,
-                'base64File': base64File.decode('utf-8'),
-            })
+    def recognizePayload(self, data_source_id, payload):
         response = requests.post(
             'https://siftrics.com/api/hydra/{}/'.format(data_source_id),
             headers={ 'Authorization': 'Basic {}'.format(self.api_key) },
@@ -68,5 +42,73 @@ class Client:
         response.raise_for_status()
         json = response.json()
         if 'Rows' not in json:
-            raise Exception('This should never happen. Got successful HTTP status code (200) but the body was not the JSON we were expecting.')
+            raise Exception('This should never happen. '+\
+                            'Got successful HTTP status code (200) but '+\
+                            'the body was not the JSON we were expecting.')
         return json['Rows']
+
+
+    def recognize(self, data_source_id, files, doFaster=False):
+        if type(files) is not list:
+            msg = 'You must pass in a list of files, not a {}'.format(type(files))
+            raise TypeError(msg)
+        payload = { 'files': [], 'doFaster': doFaster }
+        for f in files:
+            fn = f.lower()
+            if fn.endswith('.pdf'):
+                mimeType = 'application/pdf'
+            elif fn.endswith('.bmp'):
+                mimeType = 'image/bmp'
+            elif fn.endswith('.gif'):
+                mimeType = 'image/gif'
+            elif fn.endswith('.jpeg'):
+                mimeType = 'image/jpeg'
+            elif fn.endswith('.jpg'):
+                mimeType = 'image/jpg'
+            elif fn.endswith('.png'):
+                mimeType = 'image/png'
+            else:
+                msg = '{} does not have a valid extension; it must be one of '.format(f)+\
+                    '".pdf", ".bmp", ".gif", ".jpeg", ".jpg", or ".png".'
+                raise Exception(msg)
+            with open(f, 'rb') as fileObj:
+                base64File = base64.b64encode(fileObj.read())
+            payload['files'].append({
+                'mimeType': mimeType,
+                'base64File': base64File.decode('utf-8'),
+            })
+        return self.recognizePayload(data_source_id, payload)
+
+    def recognizeBase64(self, data_source_id, base64Files, doFaster=False):
+        if type(base64Files) is not list:
+            msg = 'You must pass in a list of dicts, not a {}'.format(type(files))
+            raise TypeError(msg)
+        payload = { 'files': base64Files, 'doFaster': doFaster }
+        for i, f in enumerate(payload['files']):
+            if type(f) is not dict:
+                msg = 'You must pass in a list of dicts but '+\
+                    'the element at index {} is of type {}'.format(i, type(f))
+                raise TypeError(msg)
+            if 'mimeType' not in f or 'base64File' not in f:
+                raise Exception('Expected each element of base64Files to be '+\
+                                'a dict containing "mimeType" and "base64File" field but '+\
+                                'the element at index {} does not. '.format(i)+\
+                                'Correct example: '+\
+                                '{ "mimeType": "image/jpg", "base64File": "..." }')
+            if type(f['mimeType']) is not str:
+                raise TypeError('Expected the "mimeType" field of each element to be of type str.')
+            if type(f['base64File']) is not str:
+                raise TypeError('Expected the "base64File" field of each element to be of type str.')
+            if f['mimeType'] not in [
+                    'application/pdf',
+                    'image/bmp',
+                    'image/gif',
+                    'image/jpeg',
+                    'image/jpg',
+                    'image/png',
+            ]:
+                raise Exception('Expected mimeType to be one of '+\
+                                '"application/pdf", "image/bmp", "image/gif", '+\
+                                '"image/jpeg", "image/jpg", or "image/png" but '+\
+                                'the element at index {} has mimeType "{}"'.format(i, f['mimeType']))
+        return self.recognizePayload(data_source_id, payload)

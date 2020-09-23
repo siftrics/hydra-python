@@ -46,12 +46,29 @@ rows = client.recognize('my_data_source_id', ['invoice.pdf', 'receipt_1.png'])
 
 `RecognizedText` is a dictionary mapping labels to values. Labels are the titles of the bounding boxes drawn during the creation of the data source. Values are the recognized text inside those bounding boxes.
 
+# Using Base64 Strings Instead of File Paths
 
-## Faster Results
+There is another function, `client.recognizeBase64(dataSourceId, base64Files, doFaster=False)`, which accepts base64 strings (file contents) instead of file paths. Because it is not trivial to infer MIME type from the contents of a file, you must specify the MIME type associated to each base64 file string: `base64Files` must be a list of `dict` objects containing two fields: `"mimeType"` and ``"base64File"`. Example:
+
+```
+    base64Files = [
+        {
+            'mimeType': 'image/png',
+            'base64File': '...',
+        },
+        {
+            'mimeType': 'application/pdf',
+            'base64File': '...',
+        },
+    ]
+    rows = client.recognizeBase64('Helm-Test-Againe', base64Files, doFaster=True)
+```
+
+# Faster Results
 
 `client.recognize(dataSourceId, files, doFaster=False)` has a parameter, `doFaster`, which defaults to `False`, but if it's set to `True` then Siftrics processes the documents faster at the risk of lower text recognition accuracy. Experimentally, doFaster=true seems not to affect accuracy when all the documents to be processed have been rotated no more than 45 degrees.
 
-## Official API Documentation
+# Official API Documentation
 
 Here is the [official documentation for the Hydra API](https://siftrics.com/docs/hydra.html).
 
