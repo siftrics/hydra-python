@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 
 import base64
 import requests
@@ -48,11 +48,18 @@ class Client:
         return json['Rows']
 
 
-    def recognize(self, data_source_id, files, doFaster=False):
+    def recognize(self, data_source_id, files, doFaster=False, returnJpgs=False, jpgQuality=85):
+        if type(jpgQuality) is not int:
+            raise TypeError('jpgQuality must be an integer')
+        if jpgQuality < 1 or jpgQuality > 100:
+            raise Exception('jpgQuality must be an integer between 1 and 100 inclusive')
         if type(files) is not list:
             msg = 'You must pass in a list of files, not a {}'.format(type(files))
             raise TypeError(msg)
-        payload = { 'files': [], 'doFaster': doFaster }
+        payload = { 'files': [],
+                    'doFaster': doFaster,
+                    'returnJpgs': returnJpgs,
+                    'jpgQuality': jpgQuality }
         for f in files:
             fn = f.lower()
             if fn.endswith('.pdf'):
@@ -79,11 +86,18 @@ class Client:
             })
         return self.recognizePayload(data_source_id, payload)
 
-    def recognizeBase64(self, data_source_id, base64Files, doFaster=False):
+    def recognizeBase64(self, data_source_id, base64Files, doFaster=False, returnJpgs=False, jpgQuality=85):
+        if type(jpgQuality) is not int:
+            raise TypeError('jpgQuality must be an integer')
+        if jpgQuality < 1 or jpgQuality > 100:
+            raise Exception('jpgQuality must be an integer between 1 and 100 inclusive')
         if type(base64Files) is not list:
             msg = 'You must pass in a list of dicts, not a {}'.format(type(files))
             raise TypeError(msg)
-        payload = { 'files': base64Files, 'doFaster': doFaster }
+        payload = { 'files': base64Files,
+                    'doFaster': doFaster,
+                    'returnJpgs': returnJpgs,
+                    'jpgQuality': jpgQuality }
         for i, f in enumerate(payload['files']):
             if type(f) is not dict:
                 msg = 'You must pass in a list of dicts but '+\
