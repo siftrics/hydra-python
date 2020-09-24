@@ -66,11 +66,11 @@ There is another function, `client.recognizeBase64(dataSourceId, base64Files, do
 
 # Faster Results
 
-`client.recognize(dataSourceId, files, doFaster=False)` has a parameter, `doFaster`, which defaults to `False`, but if it's set to `True` then Siftrics processes the documents faster at the risk of lower text recognition accuracy. Experimentally, doFaster=true seems not to affect accuracy when all the documents to be processed have been rotated no more than 45 degrees.
+The `recognize` and `recognizeBase64` functions have an additional default parameter, `doFaster`, which defaults to `False`, but if it's set to `True` then Siftrics processes the documents faster at the risk of lower text recognition accuracy. Experimentally, doFaster=true seems not to affect accuracy when all the documents to be processed have been rotated no more than 45 degrees.
 
 # Exporting JPGs instead of PNGs
 
-`client.recognize(dataSourceId, files, returnJpgs=True, jpgQuality=85)` has a parameter, `returnJpgs`, which defaults to `False`, but if it's set to `True` then Siftrics returns cropped images in JPG format instead of PNG format. `jpgQuality` defaults to 85 and must be an integer between 1 and 100 inclusive.
+The `recognize` and `recognizeBase64` functions have additional default parameters, `returnJpgs=False` and `jpgQuality=85`. If `returnJpgs` is set to `True`, then Siftrics returns cropped images in JPG format instead of PNG format. `jpgQuality` must be an integer between 1 and 100 inclusive.
 
 # Official API Documentation
 
