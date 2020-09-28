@@ -18,7 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 import base64
 import requests
@@ -47,8 +47,10 @@ class Client:
                             'the body was not the JSON we were expecting.')
         return json['Rows']
 
-
-    def recognize(self, data_source_id, files, doFaster=False, returnJpgs=False, jpgQuality=85):
+    def recognize(self, data_source_id, files,
+                  doFaster=False,
+                  returnTransformedImages=False,
+                  returnJpgs=False, jpgQuality=85):
         if type(jpgQuality) is not int:
             raise TypeError('jpgQuality must be an integer')
         if jpgQuality < 1 or jpgQuality > 100:
@@ -58,6 +60,7 @@ class Client:
             raise TypeError(msg)
         payload = { 'files': [],
                     'doFaster': doFaster,
+                    'returnTransformedImages': returnTransformedImages,
                     'returnJpgs': returnJpgs,
                     'jpgQuality': jpgQuality }
         for f in files:
@@ -86,7 +89,10 @@ class Client:
             })
         return self.recognizePayload(data_source_id, payload)
 
-    def recognizeBase64(self, data_source_id, base64Files, doFaster=False, returnJpgs=False, jpgQuality=85):
+    def recognizeBase64(self, data_source_id, base64Files,
+                        doFaster=False,
+                        returnTransformedImages=False,
+                        returnJpgs=False, jpgQuality=85):
         if type(jpgQuality) is not int:
             raise TypeError('jpgQuality must be an integer')
         if jpgQuality < 1 or jpgQuality > 100:
@@ -96,6 +102,7 @@ class Client:
             raise TypeError(msg)
         payload = { 'files': base64Files,
                     'doFaster': doFaster,
+                    'returnTransformedImages': returnTransformedImages,
                     'returnJpgs': returnJpgs,
                     'jpgQuality': jpgQuality }
         for i, f in enumerate(payload['files']):

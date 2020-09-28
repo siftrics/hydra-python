@@ -64,6 +64,38 @@ There is another function, `client.recognizeBase64(dataSourceId, base64Files, do
     rows = client.recognizeBase64('Helm-Test-Againe', base64Files, doFaster=True)
 ```
 
+# Returning Transformed / Pre-Processed Images
+
+Hydra can transform input documents so they are cropped and aligned with the original image used to create the data source.
+
+The `recognize` and `recognizeBase64` functions have an additional default parameter, `returnTransformedImages`, which defaults to `False`, but if it's set to `True` then Siftrics transforms and returns images so they are aligned with the original image.
+
+Returned images will be available in the "TransformedImages" field of each element of "Rows" in the response:
+
+```
+{
+  "Rows": [
+    {
+      "Error": "",
+      "FileIndex": 0,
+      "RecognizedText": {
+        "My Field 1": "text from your document...",
+        "My Field 2": "text from your document...",
+        ...
+      },
+      "TransformedImages": [
+        {
+          "Base64Image": ...,
+          "PageNumber": 1
+        },
+        ...
+      ]
+    },
+    ...
+  ]
+}
+```
+
 # Faster Results
 
 The `recognize` and `recognizeBase64` functions have an additional default parameter, `doFaster`, which defaults to `False`, but if it's set to `True` then Siftrics processes the documents faster at the risk of lower text recognition accuracy. Experimentally, doFaster=true seems not to affect accuracy when all the documents to be processed have been rotated no more than 45 degrees.
